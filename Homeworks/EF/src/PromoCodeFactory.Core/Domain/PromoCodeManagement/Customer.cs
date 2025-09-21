@@ -1,6 +1,4 @@
-﻿using PromoCodeFactory.Core.Domain;
-using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 
 namespace PromoCodeFactory.Core.Domain.PromoCodeManagement
 {
@@ -14,6 +12,10 @@ namespace PromoCodeFactory.Core.Domain.PromoCodeManagement
 
         public string Email { get; set; }
 
-        //TODO: Списки Preferences и Promocodes 
+        public virtual ICollection<CustomerPreference> CustomerPreferences { get; set; } =
+            new List<CustomerPreference>();
+
+        public virtual ICollection<PromoCode> PromoCodes { get; set; } =
+            new List<PromoCode>();
     }
 }

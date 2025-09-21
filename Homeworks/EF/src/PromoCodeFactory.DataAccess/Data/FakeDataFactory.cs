@@ -16,7 +16,7 @@ namespace PromoCodeFactory.DataAccess.Data
                 Email = "owner@somemail.ru",
                 FirstName = "Иван",
                 LastName = "Сергеев",
-                Role = Roles.FirstOrDefault(x => x.Name == "Admin"),
+                RoleId = Roles.FirstOrDefault(x => x.Name == "Admin").Id,
                 AppliedPromocodesCount = 5
             },
             new Employee()
@@ -25,7 +25,7 @@ namespace PromoCodeFactory.DataAccess.Data
                 Email = "andreev@somemail.ru",
                 FirstName = "Петр",
                 LastName = "Андреев",
-                Role = Roles.FirstOrDefault(x => x.Name == "PartnerManager"),
+                RoleId = Roles.FirstOrDefault(x => x.Name == "PartnerManager").Id,
                 AppliedPromocodesCount = 10
             },
         };
@@ -51,17 +51,17 @@ namespace PromoCodeFactory.DataAccess.Data
             new Preference()
             {
                 Id = Guid.Parse("ef7f299f-92d7-459f-896e-078ed53ef99c"),
-                Name = "Театр",
+                Description = "Театр",
             },
             new Preference()
             {
                 Id = Guid.Parse("c4bda62e-fc74-4256-a956-4760b3858cbd"),
-                Name = "Семья",
+                Description = "Семья",
             },
             new Preference()
             {
                 Id = Guid.Parse("76324c47-68d2-472d-abb8-33cfa8cc0c84"),
-                Name = "Дети",
+                Description = "Дети",
             }
         };
 
@@ -78,7 +78,19 @@ namespace PromoCodeFactory.DataAccess.Data
                         Email = "ivan_sergeev@mail.ru",
                         FirstName = "Иван",
                         LastName = "Петров",
-                        //TODO: Добавить предзаполненный список предпочтений
+                        CustomerPreferences = new List<CustomerPreference>()
+                        {
+                            new CustomerPreference()
+                            {
+                                CustomerId = customerId,
+                                PreferenceId = Guid.Parse("ef7f299f-92d7-459f-896e-078ed53ef99c")
+                            },
+                            new CustomerPreference()
+                            {
+                                CustomerId = customerId,
+                                PreferenceId = Guid.Parse("76324c47-68d2-472d-abb8-33cfa8cc0c84")
+                            },
+                        }
                     }
                 };
 
