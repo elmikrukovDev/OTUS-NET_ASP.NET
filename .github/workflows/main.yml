@@ -1,0 +1,37 @@
+name: .NET Tests
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v3
+      with:
+        dotnet-version: '8.0.x'
+        
+    - name: Restore dependencies
+      run: |
+        if [ -f "PromoCodeFactory.sln" ]; then
+          dotnet restore PromoCodeFactory.sln
+          dotnet build PromoCodeFactory.sln --no-restore --configuration Release
+        fi
+      
+    - name: Test
+      run: |
+        if [ -f "PromoCodeFactory.sln" ]; then
+          dotnet test --no-build --configuration Release --verbosity normal
+        fi
+      
+    - name: Test Results
+      if: always()
+      run: |
+        echo "Tests complete!"
