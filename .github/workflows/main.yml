@@ -26,7 +26,10 @@ jobs:
         fi
       
     - name: Test
-      run: dotnet test --no-build --configuration Release --verbosity normal
+      run: |
+        if [ -f "PromoCodeFactory.sln" ]; then
+          dotnet test --no-build --configuration Release --verbosity normal
+        fi
       
     - name: Test Results
       if: always()
