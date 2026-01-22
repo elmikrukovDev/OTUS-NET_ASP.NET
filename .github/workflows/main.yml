@@ -19,10 +19,11 @@ jobs:
         dotnet-version: '8.0.x'
         
     - name: Restore dependencies
-      run: dotnet restore
-      
-    - name: Build
-      run: dotnet build --no-restore --configuration Release
+      run: |
+        if [ -f "PromoCodeFactory.sln" ]; then
+          dotnet restore PromoCodeFactory.sln
+          dotnet build PromoCodeFactory.sln --no-restore --configuration Release
+        fi
       
     - name: Test
       run: dotnet test --no-build --configuration Release --verbosity normal
