@@ -1,12 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
-using Pcf.ReceivingFromPartner.Core.Abstractions.Repositories;
-using Pcf.ReceivingFromPartner.Core.Domain;
+using Pcf.ReceivingFromPartner.Core.Abstractions.Cache;
 using Pcf.ReceivingFromPartner.WebHost.Models;
-
 namespace Pcf.ReceivingFromPartner.WebHost.Controllers
 {
     /// <summary>
@@ -17,11 +14,11 @@ namespace Pcf.ReceivingFromPartner.WebHost.Controllers
     public class PreferencesController
         : ControllerBase
     {
-        private readonly IRepository<Preference> _preferencesRepository;
+        private readonly IPreferenceCacheService _preferenceService;
 
-        public PreferencesController(IRepository<Preference> preferencesRepository)
+        public PreferencesController(IPreferenceCacheService preferenceService)
         {
-            _preferencesRepository = preferencesRepository;
+            _preferenceService = preferenceService;
         }
         
         /// <summary>
@@ -31,7 +28,7 @@ namespace Pcf.ReceivingFromPartner.WebHost.Controllers
         [HttpGet]
         public async Task<ActionResult<List<PreferenceResponse>>> GetPreferencesAsync()
         {
-            var preferences = await _preferencesRepository.GetAllAsync();
+            var preferences = await _preferenceService.GetPreferencesAsync();
 
             var response = preferences.Select(x => new PreferenceResponse()
             {

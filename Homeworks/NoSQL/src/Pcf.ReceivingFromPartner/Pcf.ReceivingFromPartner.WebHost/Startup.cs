@@ -10,14 +10,16 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Configuration;
+using Pcf.ReceivingFromPartner.Core.Abstractions.Cache;
 using Pcf.ReceivingFromPartner.Core.Abstractions.Gateways;
 using Pcf.ReceivingFromPartner.Core.Abstractions.Repositories;
 using Pcf.ReceivingFromPartner.DataAccess;
+using Pcf.ReceivingFromPartner.DataAccess.Cache;
 using Pcf.ReceivingFromPartner.DataAccess.Data;
 using Pcf.ReceivingFromPartner.DataAccess.Repositories;
 using Pcf.ReceivingFromPartner.Integration;
 using IConfiguration = Microsoft.Extensions.Configuration.IConfiguration;
-
+using StackExchange.Redis;
 namespace Pcf.ReceivingFromPartner.WebHost
 {
     public class Startup
@@ -56,6 +58,13 @@ namespace Pcf.ReceivingFromPartner.WebHost
                 x.UseSnakeCaseNamingConvention();
                 x.UseLazyLoadingProxies();
             });
+            
+            services.AddSingleton<IConnectionMultiplexer>(sp =>
+            {
+                var redisConnection = Configuration.GetConnectionString("PromocodeFactoryReceivingFromPartnerRedis");
+                return ConnectionMultiplexer.Connect(redisConnection);
+            });
+            services.AddScoped<IPreferenceCacheService, PreferenceCacheService>();
 
             services.AddOpenApiDocument(options =>
             {
