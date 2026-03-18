@@ -57,7 +57,7 @@ namespace Pcf.GivingToCustomer.WebHost.Controllers
         /// </summary>
         /// <returns></returns>
         [HttpPost]
-        public async Task<IActionResult> GivePromoCodesToCustomersWithPreferenceAsync(GivePromoCodeRequest request)
+        public async Task<IActionResult> GivePromoCodesToCustomersWithPreferenceAsync(Models.GivePromoCodeRequest request)
         {
             //Получаем предпочтение по имени
             var preference = await _preferencesRepository.GetByIdAsync(request.PreferenceId);

@@ -1,31 +1,26 @@
-﻿using System;
+﻿using Pcf.GivingToCustomer.Core.Domain;
+using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Pcf.GivingToCustomer.Core.Domain;
-using Pcf.GivingToCustomer.WebHost.Models;
 
 namespace Pcf.GivingToCustomer.WebHost.Mappers
 {
     public class PromoCodeMapper
     {
-        public static PromoCode MapFromModel(GivePromoCodeRequest request, Preference preference, IEnumerable<Customer> customers)
+        public static PromoCode MapFromModel(Models.GivePromoCodeRequest request, Preference preference, IEnumerable<Customer> customers)
         {
 
-            var promocode = new PromoCode();
-            promocode.Id = request.PromoCodeId;
-
-            promocode.PartnerId = request.PartnerId;
-            promocode.Code = request.PromoCode;
-            promocode.ServiceInfo = request.ServiceInfo;
-
-            promocode.BeginDate = DateTime.Parse(request.BeginDate);
-            promocode.EndDate = DateTime.Parse(request.EndDate);
-
-            promocode.Preference = preference;
-            promocode.PreferenceId = preference.Id;
-
-            promocode.Customers = new List<PromoCodeCustomer>();
+            var promocode = new PromoCode
+            {
+                Id = request.PromoCodeId,
+                PartnerId = request.PartnerId,
+                Code = request.PromoCode,
+                ServiceInfo = request.ServiceInfo,
+                BeginDate = DateTime.Parse(request.BeginDate),
+                EndDate = DateTime.Parse(request.EndDate),
+                Preference = preference,
+                PreferenceId = preference.Id,
+                Customers = []
+            };
 
             foreach (var item in customers)
             {
@@ -37,7 +32,7 @@ namespace Pcf.GivingToCustomer.WebHost.Mappers
                     PromoCodeId = promocode.Id,
                     PromoCode = promocode
                 });
-            };
+            }
 
             return promocode;
         }

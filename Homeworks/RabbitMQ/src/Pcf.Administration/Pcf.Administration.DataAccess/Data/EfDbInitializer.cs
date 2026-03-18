@@ -1,7 +1,4 @@
-﻿using Pcf.Administration.DataAccess;
-using System.Threading.Tasks;
-
-namespace Pcf.Administration.DataAccess.Data
+﻿namespace Pcf.Administration.DataAccess.Data
 {
     public class EfDbInitializer
         : IDbInitializer

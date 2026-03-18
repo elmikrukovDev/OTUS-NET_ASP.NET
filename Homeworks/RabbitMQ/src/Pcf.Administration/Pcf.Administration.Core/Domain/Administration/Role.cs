@@ -1,7 +1,4 @@
-﻿using Pcf.Administration.Core.Domain;
-using System;
-
-namespace Pcf.Administration.Core.Domain.Administration
+﻿namespace Pcf.Administration.Core.Domain.Administration
 {
     public class Role
         : BaseEntity

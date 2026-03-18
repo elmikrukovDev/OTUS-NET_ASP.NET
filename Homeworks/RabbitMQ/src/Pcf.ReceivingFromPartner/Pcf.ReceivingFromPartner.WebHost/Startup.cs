@@ -1,4 +1,5 @@
 using System;
+using System.Threading.Tasks;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.EntityFrameworkCore;
@@ -8,11 +9,13 @@ using Microsoft.Extensions.Configuration;
 using IConfiguration = Microsoft.Extensions.Configuration.IConfiguration;
 using Pcf.ReceivingFromPartner.Core.Abstractions.Repositories;
 using Pcf.ReceivingFromPartner.Core.Abstractions.Gateways;
+using Pcf.ReceivingFromPartner.Core.Abstractions.Publisher;
 using Pcf.ReceivingFromPartner.DataAccess;
 using Pcf.ReceivingFromPartner.DataAccess.Repositories;
 using Pcf.ReceivingFromPartner.DataAccess.Data;
 using Pcf.ReceivingFromPartner.Integration;
-
+using Pcf.ReceivingFromPartner.Integration.Messaging;
+using RabbitMQ.Client;
 namespace Pcf.ReceivingFromPartner.WebHost
 {
     public class Startup
@@ -28,6 +31,32 @@ namespace Pcf.ReceivingFromPartner.WebHost
         // For more information on how to configure your application, visit https://go.microsoft.com/fwlink/?LinkID=398940
         public void ConfigureServices(IServiceCollection services)
         {
+            var rabbitConfig = Configuration.GetSection("RabbitMQ");
+
+            services.AddSingleton(async sp =>
+            {
+                var factory = new ConnectionFactory
+                {
+                    HostName = rabbitConfig["HostName"],
+                    Port = int.Parse(rabbitConfig["Port"]!),
+                    UserName = rabbitConfig["UserName"],
+                    Password = rabbitConfig["Password"]
+                };
+
+                var connection = await factory.CreateConnectionAsync();
+                return connection;
+            });
+            services.AddSingleton(async sp =>
+            {
+                var connection = await sp.GetRequiredService<Task<IConnection>>();
+                var channel = await connection.CreateChannelAsync();
+                return channel;
+            });
+            services.AddScoped<IEventPublisher, RabbitMqEventPublisher>();
+            services.AddScoped<IAdministrationEventPublisher, RabbitMqAdministrationEventPublisher>();
+            services.AddScoped<IGivingPromoCodeToCustomerEventPublisher, RabbitMqGivingPromoCodeToCustomerEventPublisher>();
+
+
             services.AddControllers().AddMvcOptions(x =>
                 x.SuppressAsyncSuffixInActionNames = false);
             services.AddScoped(typeof(IRepository<>), typeof(EfRepository<>));

@@ -1,13 +1,15 @@
-﻿using System;
+﻿using Microsoft.AspNetCore.Mvc;
+using Pcf.ReceivingFromPartner.Core.Abstractions.Gateways;
+using Pcf.ReceivingFromPartner.Core.Abstractions.Publisher;
+using Pcf.ReceivingFromPartner.Core.Abstractions.Repositories;
+using Pcf.ReceivingFromPartner.Core.Domain;
+using Pcf.ReceivingFromPartner.Core.Domain.Events;
+using Pcf.ReceivingFromPartner.WebHost.Mappers;
+using Pcf.ReceivingFromPartner.WebHost.Models;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Mvc;
-using Pcf.ReceivingFromPartner.Core.Abstractions.Repositories;
-using Pcf.ReceivingFromPartner.Core.Domain;
-using Pcf.ReceivingFromPartner.Core.Abstractions.Gateways;
-using Pcf.ReceivingFromPartner.WebHost.Models;
-using Pcf.ReceivingFromPartner.WebHost.Mappers;
 
 namespace Pcf.ReceivingFromPartner.WebHost.Controllers
 {
@@ -22,20 +24,20 @@ namespace Pcf.ReceivingFromPartner.WebHost.Controllers
         private readonly IRepository<Partner> _partnersRepository;
         private readonly IRepository<Preference> _preferencesRepository;
         private readonly INotificationGateway _notificationGateway;
-        private readonly IGivingPromoCodeToCustomerGateway _givingPromoCodeToCustomerGateway;
-        private readonly IAdministrationGateway _administrationGateway;
+        private readonly IGivingPromoCodeToCustomerEventPublisher _givingPromoCodeToCustomerEventPublisher;
+        private readonly IAdministrationEventPublisher _administrationEventPublisher;
 
         public PartnersController(IRepository<Partner> partnersRepository,
             IRepository<Preference> preferencesRepository,
             INotificationGateway notificationGateway,
-            IGivingPromoCodeToCustomerGateway givingPromoCodeToCustomerGateway,
-            IAdministrationGateway administrationGateway)
+            IGivingPromoCodeToCustomerEventPublisher givingPromoCodeToCustomerEventPublisher,
+            IAdministrationEventPublisher administrationEventPublisher)
         {
             _partnersRepository = partnersRepository;
             _preferencesRepository = preferencesRepository;
             _notificationGateway = notificationGateway;
-            _givingPromoCodeToCustomerGateway = givingPromoCodeToCustomerGateway;
-            _administrationGateway = administrationGateway;
+            _givingPromoCodeToCustomerEventPublisher = givingPromoCodeToCustomerEventPublisher;
+            _administrationEventPublisher = administrationEventPublisher;
         }
 
         /// <summary>
@@ -329,17 +331,22 @@ namespace Pcf.ReceivingFromPartner.WebHost.Controllers
             partner.NumberIssuedPromoCodes++;
 
             await _partnersRepository.UpdateAsync(partner);
+            var evt = new PromoCodeGivenEvent
+            {
+                ServiceInfo = promoCode.ServiceInfo,
+                PartnerId = promoCode.PartnerId,
+                PromoCodeId = promoCode.Id,
+                PromoCode = promoCode.Code,
+                PreferenceId = promoCode.PreferenceId,
+                BeginDate = promoCode.BeginDate.ToString("yyyy-MM-dd"),
+                EndDate = promoCode.BeginDate.ToString("yyyy-MM-dd"),
+            };
+            await _givingPromoCodeToCustomerEventPublisher.GivePromoCodeToCustomer(evt);
 
-            //TODO: Чтобы информация о том, что промокод был выдан парнером была отправлена
-            //в микросервис рассылки клиентам нужно либо вызвать его API, либо отправить событие в очередь
-            await _givingPromoCodeToCustomerGateway.GivePromoCodeToCustomer(promoCode);
-
-            //TODO: Чтобы информация о том, что промокод был выдан парнером была отправлена
-            //в микросервис администрирования нужно либо вызвать его API, либо отправить событие в очередь
 
             if (request.PartnerManagerId.HasValue)
             {
-                await _administrationGateway.NotifyAdminAboutPartnerManagerPromoCode(request.PartnerManagerId.Value);
+                await _administrationEventPublisher.NotifyAdminAboutPartnerManagerPromoCode(request.PartnerManagerId.Value);
             }
 
             return CreatedAtAction(nameof(GetPartnerPromoCodeAsync),

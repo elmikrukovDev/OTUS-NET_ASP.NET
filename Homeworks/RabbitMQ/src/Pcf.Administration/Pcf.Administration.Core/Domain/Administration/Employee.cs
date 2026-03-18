@@ -1,6 +1,4 @@
-﻿using Pcf.Administration.Core.Domain;
-using System;
-using System.Collections.Generic;
+﻿using System;
 
 namespace Pcf.Administration.Core.Domain.Administration
 {
