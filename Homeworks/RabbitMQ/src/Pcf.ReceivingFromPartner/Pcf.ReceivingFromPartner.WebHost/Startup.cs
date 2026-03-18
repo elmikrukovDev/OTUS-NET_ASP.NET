@@ -6,6 +6,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Configuration;
+using Pcf.Grpc;
 using IConfiguration = Microsoft.Extensions.Configuration.IConfiguration;
 using Pcf.ReceivingFromPartner.Core.Abstractions.Repositories;
 using Pcf.ReceivingFromPartner.Core.Abstractions.Gateways;
@@ -14,6 +15,7 @@ using Pcf.ReceivingFromPartner.DataAccess;
 using Pcf.ReceivingFromPartner.DataAccess.Repositories;
 using Pcf.ReceivingFromPartner.DataAccess.Data;
 using Pcf.ReceivingFromPartner.Integration;
+using Pcf.ReceivingFromPartner.Integration.grpc;
 using Pcf.ReceivingFromPartner.Integration.Messaging;
 using RabbitMQ.Client;
 namespace Pcf.ReceivingFromPartner.WebHost
@@ -32,7 +34,10 @@ namespace Pcf.ReceivingFromPartner.WebHost
         public void ConfigureServices(IServiceCollection services)
         {
             var rabbitConfig = Configuration.GetSection("RabbitMQ");
-
+            services.AddGrpcClient<CustomerService.CustomerServiceClient>(o =>
+            {
+                o.Address = new Uri("https://localhost:8093");
+            });
             services.AddSingleton(async sp =>
             {
                 var factory = new ConnectionFactory
@@ -52,10 +57,12 @@ namespace Pcf.ReceivingFromPartner.WebHost
                 var channel = await connection.CreateChannelAsync();
                 return channel;
             });
-            services.AddScoped<IEventPublisher, RabbitMqEventPublisher>();
-            services.AddScoped<IAdministrationEventPublisher, RabbitMqAdministrationEventPublisher>();
-            services.AddScoped<IGivingPromoCodeToCustomerEventPublisher, RabbitMqGivingPromoCodeToCustomerEventPublisher>();
 
+            services.AddScoped<IEventPublisher, RabbitMqEventPublisher>();
+            services.AddScoped<IAdministrationEventPublisher, SignalRAdministrationPublisher>();
+            services.AddScoped<
+                IGivingPromoCodeToCustomerEventPublisher,
+                GrpcPromoCodePublisher>();
 
             services.AddControllers().AddMvcOptions(x =>
                 x.SuppressAsyncSuffixInActionNames = false);
@@ -109,7 +116,6 @@ namespace Pcf.ReceivingFromPartner.WebHost
             });
 
             app.UseHttpsRedirection();
-
             app.UseRouting();
 
             app.UseEndpoints(endpoints =>

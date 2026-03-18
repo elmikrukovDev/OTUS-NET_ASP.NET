@@ -13,6 +13,7 @@ using Pcf.GivingToCustomer.DataAccess;
 using Pcf.GivingToCustomer.DataAccess.Data;
 using Pcf.GivingToCustomer.DataAccess.Repositories;
 using Pcf.GivingToCustomer.Integration;
+using Pcf.GivingToCustomer.Integration.grpc;
 using Pcf.GivingToCustomer.Integration.Messaging;
 using RabbitMQ.Client;
 using SurveyManageService.Infrastructure.Messaging;
@@ -50,7 +51,7 @@ namespace Pcf.GivingToCustomer.WebHost
             });
 
             AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
-
+            services.AddGrpc();
             services.AddOpenApiDocument(options =>
             {
                 options.Title = "PromoCode Factory Giving To Customer API Doc";
@@ -103,10 +104,10 @@ namespace Pcf.GivingToCustomer.WebHost
             app.UseHttpsRedirection();
 
             app.UseRouting();
-
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllers();
+                endpoints.MapGrpcService<CustomerGrpcService>();
             });
 
             dbInitializer.InitializeDb();

@@ -18,13 +18,13 @@ services:
       - "8091:8080"
     environment:
       - "ConnectionStrings:PromocodeFactoryAdministrationDb=Host=promocode-factory-administration-db;Database=promocode_factory_administration_db;Username=postgres;Password=docker"
-      - "RABBITMQ__HOSTNAME: ao_message_broker"
-      - "RABBITMQ__PORT: 5672"
-      - "RABBITMQ__USERNAME: admin"
-      - "RABBITMQ__PASSWORD: admin"
+      - RABBITMQ__HOSTNAME=promocode-factory-message_broker
+      - RABBITMQ__PORT=5672
+      - RABBITMQ__USERNAME=admin
+      - RABBITMQ__PASSWORD=admin
     depends_on: 
       - promocode-factory-administration-db
-
+      - promocode-factory-message_broker
 
   #ReceivingFromPartner Db
   promocode-factory-receiving-from-partner-db:
@@ -47,12 +47,13 @@ services:
       - "ConnectionStrings:PromocodeFactoryReceivingFromPartnerDb=Host=promocode-factory-receiving-from-partner-db;Database=promocode_factory_receiving_from_partner_db;Username=postgres;Password=docker"
       - "IntegrationSettings:GivingToCustomerApiUrl=http://promocode-factory-giving-to-customer-api"    
       - "IntegrationSettings:AdministrationApiUrl=http://promocode-factory-administration-api"
-      - "RABBITMQ__HOSTNAME: ao_message_broker"
-      - "RABBITMQ__PORT: 5672"
-      - "RABBITMQ__USERNAME: admin"
-      - "RABBITMQ__PASSWORD: admin"
+      - RABBITMQ__HOSTNAME=promocode-factory-message_broker
+      - RABBITMQ__PORT=5672
+      - RABBITMQ__USERNAME=admin
+      - RABBITMQ__PASSWORD=admin
     depends_on: 
       - promocode-factory-receiving-from-partner-db
+      - promocode-factory-message_broker
   
   #GivingToCustomer Db
   promocode-factory-giving-to-customer-db:
@@ -73,12 +74,13 @@ services:
       - "8093:8080"
     environment:
       - "ConnectionStrings:PromocodeFactoryGivingToCustomerDb=Host=promocode-factory-giving-to-customer-db;Database=promocode_factory_giving_to_customer_db;Username=postgres;Password=docker"
-      - "RABBITMQ__HOSTNAME: ao_message_broker"
-      - "RABBITMQ__PORT: 5672"
-      - "RABBITMQ__USERNAME: admin"
-      - "RABBITMQ__PASSWORD: admin"
+      - RABBITMQ__HOSTNAME=promocode-factory-message_broker
+      - RABBITMQ__PORT=5672
+      - RABBITMQ__USERNAME=admin
+      - RABBITMQ__PASSWORD=admin
     depends_on: 
       - promocode-factory-giving-to-customer-db
+      - promocode-factory-message_broker
 
   #Message broker
   promocode-factory-message_broker:
@@ -95,7 +97,7 @@ services:
       - ../docker_data/promocode-factory/pm_message_broker/rabbitmq:/var/lib/rabbitmq
       - ../docker_data/promocode-factory/pm_message_broker/rabbitmq_log:/var/log/rabbitmq
     healthcheck:
-      test: [ "CMD", "rabbitmq-diagnostics", "ping" ]
+      test: ["CMD", "rabbitmq-diagnostics", "ping"]
       interval: 5s
       retries: 12
       timeout: 5s

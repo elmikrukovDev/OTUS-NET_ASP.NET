@@ -11,6 +11,7 @@ using Pcf.Administration.Core.Abstractions.Services;
 using Pcf.Administration.DataAccess;
 using Pcf.Administration.DataAccess.Data;
 using Pcf.Administration.DataAccess.Repositories;
+using Pcf.Administration.Integration.Hub;
 using Pcf.Administration.Integration.Messaging;
 using RabbitMQ.Client;
 using System;
@@ -32,6 +33,7 @@ namespace Pcf.Administration.WebHost
         // For more information on how to configure your application, visit https://go.microsoft.com/fwlink/?LinkID=398940
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddSignalR();
             services.AddControllers().AddMvcOptions(x =>
                 x.SuppressAsyncSuffixInActionNames = false);
             services.AddScoped(typeof(IRepository<>), typeof(EfRepository<>));
@@ -103,6 +105,7 @@ namespace Pcf.Administration.WebHost
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllers();
+                endpoints.MapHub<AdministrationHub>("/adminHub");
             });
 
             dbInitializer.InitializeDb();

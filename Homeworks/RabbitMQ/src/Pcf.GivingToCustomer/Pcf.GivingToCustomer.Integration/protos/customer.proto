@@ -1,0 +1,20 @@
+syntax = "proto3";
+
+option csharp_namespace = "Pcf.Grpc";
+
+service CustomerService {
+  rpc GivePromoCode (GivePromoCodeRequest) returns (GivePromoCodeResponse);
+}
+
+message GivePromoCodeRequest {
+  string promoCodeId = 1;
+  string promoCode = 2;
+  string partnerId = 3;
+  string preferenceId = 4;
+  string beginDate = 5;
+  string endDate = 6;
+}
+
+message GivePromoCodeResponse {
+  bool success = 1;
+}
