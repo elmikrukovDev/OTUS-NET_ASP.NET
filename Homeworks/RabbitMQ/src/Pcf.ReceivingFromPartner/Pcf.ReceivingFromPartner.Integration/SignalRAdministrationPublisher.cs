@@ -12,7 +12,7 @@ public class SignalRAdministrationPublisher : IAdministrationEventPublisher
     public SignalRAdministrationPublisher()
     {
         _connection = new HubConnectionBuilder()
-            .WithUrl("http://localhost:8091/administrationHub")
+            .WithUrl("http://localhost:8091/adminHub")
             .WithAutomaticReconnect()
             .Build();
 
